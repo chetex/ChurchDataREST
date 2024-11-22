@@ -16,7 +16,7 @@ public class WebScrapingController {
 
     @GetMapping("/home")
     public Map<String, Object> getContent() throws IOException {
-        return webScrapingService.scrapeWebsite();
+        return webScrapingService.scrapHomePage();
     }
 }
 

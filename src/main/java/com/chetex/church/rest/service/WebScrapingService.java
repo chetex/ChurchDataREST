@@ -3,6 +3,7 @@ package com.chetex.church.rest.service;
 import org.jsoup.*;
 import org.jsoup.nodes.*;
 import org.jsoup.select.*;
+import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.*;
 
 import java.io.*;
@@ -10,17 +11,23 @@ import java.util.*;
 
 @Service
 public class WebScrapingService {
-    // Create a private static String variable to store the URL
-    private static final String CHURCH_URL = "https://www.parroquiasanpablovi.es/";
 
-    public Map<String, Object> scrapeWebsite() throws IOException {
+    @Value("${church.url}")
+    private String churchUrl;
+
+    /**
+     * Scrape the website and extract images and texts
+     * @return Map with images and texts
+     * @throws IOException Exception
+     */
+    public Map<String, Object> scrapHomePage() throws IOException {
         // Connect to the URL and get the HTML document
-        Document document = Jsoup.connect(CHURCH_URL).get();
+        Document document = Jsoup.connect(churchUrl).get();
 
-        // Obtener imágenes
+        // Extract images
         List<String> imageUrls = extractImages(document);
 
-        // Obtener textos
+        // Extract texts
         List<String> textContents = extractTexts(document);
 
         // Crear el resultado
