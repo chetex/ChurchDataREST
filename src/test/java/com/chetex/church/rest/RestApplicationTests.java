@@ -1,67 +1,53 @@
 package com.chetex.church.rest;
 
 import com.chetex.church.rest.service.*;
-import com.fasterxml.jackson.core.type.*;
 import com.fasterxml.jackson.databind.*;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.mockito.*;
+import org.slf4j.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.boot.test.autoconfigure.web.servlet.*;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.*;
-import org.springframework.boot.test.web.client.*;
-import org.springframework.boot.test.web.server.*;
-import org.springframework.core.*;
+import org.springframework.boot.test.context.*;
 import org.springframework.http.*;
-import org.springframework.test.web.*;
+import org.springframework.test.context.bean.override.mockito.*;
 import org.springframework.test.web.servlet.*;
 import org.springframework.test.web.servlet.request.*;
-import org.springframework.web.servlet.*;
 
 import java.util.*;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-class RestApplicationTests {
+public class RestApplicationTests {
 
-	@LocalServerPort
-	private int port;
+    private static final Logger log = LoggerFactory.getLogger(RestApplicationTests.class);
 
-	@Mock
-	private WebScrapingService webScrapingServiceMock;
+    @Autowired
+    private MockMvc mockMvc;
 
-	@Autowired
-	private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-	@Autowired
-	private ObjectMapper objectMapper;
+    @MockitoBean
+    private WebScrapingService webScrapingServiceMock;
 
-	@Autowired
-	private TestRestTemplate restTemplate;
+    @Test
+    public void getHomePageImagesAndTextsTest() throws Exception {
+        Map<String, Object> mockResponse = new HashMap<>();
+        mockResponse.put("images", Arrays.asList("http://example.com/image1.jpg", "http://example.com/image2.jpg"));
+        mockResponse.put("texts", Arrays.asList("Welcome to our church", "Join us for worship"));
 
-	/**
-	 * This method test the getGradebookController call HTTP GET method
-	 * MockMvc simulates the request and returns a MvcResult object
-	 * @throws Exception Exception
-	 */
-	@Test
-	public void getHomePageImagesAndTextsTest() throws Exception {
-		// call perform mock mvc
-		MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/home"))
-				.andExpect(status().isOk())
-				.andExpect(content().contentType("application/json")) // Is json content type
-				.andExpect(jsonPath("$.images", hasSize(greaterThan(0)))) // Verify that the images list is not empty
-				.andReturn();
+        Mockito.when(webScrapingServiceMock.scrapHomePage()).thenReturn(mockResponse);
 
-		// Convert the MvcResult to a Map
-		Map<String, Object> resultMap = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Map.class);
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/home")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.images", hasSize(2)))
+                .andExpect(jsonPath("$.texts", hasSize(2)));
 
-		// Verify that the result map contains the expected keys
-		assertThat(resultMap.keySet(), hasItems("images", "texts"));
+        log.info("getHomePageImagesAndTextsTest passed.");
+    }
 
-	}
 }

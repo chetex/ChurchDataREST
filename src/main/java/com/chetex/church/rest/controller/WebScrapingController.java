@@ -14,9 +14,24 @@ public class WebScrapingController {
     @Autowired
     private WebScrapingService webScrapingService;
 
+    /**
+     * Extract home page test
+     * @return Map with images and texts
+     * @throws IOException Input output exception
+     */
     @GetMapping("/home")
     public Map<String, Object> getContent() throws IOException {
         return webScrapingService.scrapHomePage();
+    }
+
+    /**
+     * Scrape from home page, scrape menu items
+     * @return List of menu items as Map objects
+     * @throws IOException Input output exception
+     */
+    @GetMapping("/menu")
+    public List<Map<String, String>> getMenuItems() throws IOException {
+        return webScrapingService.scrapMenuItems();
     }
 }
 
