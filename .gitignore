@@ -1,0 +1,32 @@
+# --- Peticiones específicas del usuario ---
+*.class
+*.jar
+.idea/*.xml
+node_modules/
+
+# --- Compilación y Salida (Maven/Java) ---
+target/
+out/
+*.log
+*.gz
+
+# --- IntelliJ IDEA ---
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+# Si quieres guardar la configuración de runConfigurations de IntelliJ, quita la línea siguiente:
+.idea/runConfigurations/
+
+# --- Spring Boot ---
+*.lck
+*.tmp
+*.bak
+*.swp
+*~
+.swp
+
+# --- Sistema Operativo ---
+.DS_Store
+Thumbs.db

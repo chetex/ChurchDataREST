@@ -92,7 +92,7 @@ public class WebScrapingService {
                 Element subMenu = li.selectFirst("ul.sub-menu");
 
                 if (subMenu != null) {
-                    log.info("Sub-menu detected for: {}", li.selectFirst("a").ownText());
+                    log.info("Sub-menu detected for: {}", Objects.requireNonNull(li.selectFirst("a")).ownText());
 
                     // 2. If it has a sub-menu, loop through the sub-menu <li> elements
                     Elements subMenuLinks = subMenu.select("li a");
