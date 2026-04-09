@@ -1,3 +1,12 @@
-com/chetex/church/rest/service/WebScrapingService.class
 com/chetex/church/rest/RestApplication.class
+com/chetex/church/rest/dto/NewsItemDTO.class
+com/chetex/church/rest/strategy/NewsScrapingStrategy.class
 com/chetex/church/rest/controller/WebScrapingController.class
+com/chetex/church/rest/strategy/DetailPageScrapingStrategy.class
+com/chetex/church/rest/strategy/ScrapingStrategyFactory.class
+com/chetex/church/rest/strategy/ScrapingType.class
+com/chetex/church/rest/strategy/NavigationScrapingStrategy.class
+com/chetex/church/rest/service/WebScrapingService.class
+com/chetex/church/rest/dto/NavigationItemDTO.class
+com/chetex/church/rest/dto/DetailPageDTO.class
+com/chetex/church/rest/strategy/ScrapingStrategy.class

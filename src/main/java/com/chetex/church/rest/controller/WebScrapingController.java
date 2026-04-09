@@ -1,11 +1,18 @@
 package com.chetex.church.rest.controller;
 
-import com.chetex.church.rest.service.*;
-import org.springframework.beans.factory.annotation.*;
-import org.springframework.web.bind.annotation.*;
+import com.chetex.church.rest.dto.DetailPageDTO;
+import com.chetex.church.rest.dto.HomeContentItemDTO;
+import com.chetex.church.rest.dto.NavigationItemDTO;
+import com.chetex.church.rest.dto.NewsItemDTO;
+import com.chetex.church.rest.service.WebScrapingService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -15,23 +22,46 @@ public class WebScrapingController {
     private WebScrapingService webScrapingService;
 
     /**
-     * Extract home page test
-     * @return Map with images and texts
+     * Scrape menu items and return them as a list of NavigationItemDTO.
+     * @return List of NavigationItemDTO objects representing the website's navigation.
      * @throws IOException Input output exception
      */
-    @GetMapping("/home")
-    public Map<String, Object> getContent() throws IOException {
-        return webScrapingService.scrapHomePage();
+    @GetMapping("/navigation")
+    public List<NavigationItemDTO> getNavigation() throws IOException {
+        return webScrapingService.getNavigation();
     }
 
     /**
-     * Scrape from home page, scrape menu items
-     * @return List of menu items as Map objects
+     * Scrape home news items and return them as a list of NewsItemDTO.
+     * @return List of NewsItemDTO objects representing the news from the home page.
      * @throws IOException Input output exception
      */
-    @GetMapping("/menu")
-    public List<Map<String, String>> getMenuItems() throws IOException {
-        return webScrapingService.scrapMenuItems();
+    @GetMapping("/news")
+    public List<NewsItemDTO> getNews() throws IOException {
+        return webScrapingService.getHomeNews();
+    }
+
+    /**
+     * Scrapea la home principal y todas las sub-páginas accesibles a través del menú
+     * (menús y submenús, recursivamente), devolviendo un único listado agregado
+     * de elementos con title, subtitle, text, image y linkUrl.
+     *
+     * @return Lista agregada de elementos de contenido.
+     * @throws IOException si falla el scraping de la home principal.
+     */
+    @GetMapping("/home")
+    public List<HomeContentItemDTO> getHome() throws IOException {
+        return webScrapingService.getHomeAggregate();
+    }
+
+    /**
+     * Scrape a detail page from a given URL and return its content as a DetailPageDTO.
+     * @param url The URL of the detail page to scrape.
+     * @return DetailPageDTO object containing the extracted information.
+     * @throws IOException Input output exception
+     */
+    @GetMapping("/detail")
+    public DetailPageDTO getDetailPage(@RequestParam String url) throws IOException {
+        return webScrapingService.getDetailPage(url);
     }
 }
-
