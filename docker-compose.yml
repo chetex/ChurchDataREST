@@ -1,6 +1,7 @@
 version: "3.8"
 
 services:
+  # --- Spring Boot application --------------------------------------------
   app:
     build:
       context: .
@@ -9,10 +10,44 @@ services:
     ports:
       - "8080:8080" # maps the container port 8080 to the host port 8080
     environment:
-      SPRING_PROFILES_ACTIVE: docker # Docker profile
+      # Activate the Docker profile for environment-specific overrides.
+      SPRING_PROFILES_ACTIVE: docker
+      # Point Spring at the postgres service over the internal Docker network.
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/churchdata
+      # Credentials kept aligned with the postgres service environment below.
+      SPRING_DATASOURCE_USERNAME: churchdata
+      SPRING_DATASOURCE_PASSWORD: churchdata
+    depends_on:
+      # Wait for the DB to accept connections before starting the app.
+      postgres:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  # --- PostgreSQL cache store ---------------------------------------------
+  postgres:
+    image: postgres:16-alpine       # Lightweight official image pinned to a stable major version.
+    container_name: churchdata-postgres
+    restart: unless-stopped         # Auto-restart after crashes while respecting user-initiated stops.
+    environment:
+      POSTGRES_DB: churchdata       # Database created on first startup.
+      POSTGRES_USER: churchdata     # Superuser owning the DB; matches app datasource username.
+      POSTGRES_PASSWORD: churchdata # Matches SPRING_DATASOURCE_PASSWORD above.
+    ports:
+      - "5432:5432"                 # Expose locally for ad-hoc psql access (safe to remove in prod).
+    volumes:
+      - postgres-data:/var/lib/postgresql/data # Persist DB files across container restarts.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U churchdata -d churchdata"] # Readiness probe used by app's depends_on.
+      interval: 5s
+      timeout: 3s
+      retries: 10
     networks:
       - app-network
 
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  postgres-data: # Named volume keeps the cached JSON + fingerprints across restarts.

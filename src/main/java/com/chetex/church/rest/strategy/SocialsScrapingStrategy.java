@@ -25,11 +25,23 @@ import java.util.Map;
 /**
  * Estrategia que recopila los enlaces a redes sociales de la web.
  *
- * <p>Busca primero en el {@code <header>} (donde Colibri WP y la mayoría de
- * temas colocan los iconos sociales) y después en el {@code <footer>}, con
- * énfasis en detectar un enlace de Telegram que en este sitio suele vivir
- * solo en el pie. Los resultados se deduplican por nombre de red con el
- * criterio "el primero en aparecer gana".</p>
+ * <p>El sitio está construido con Colibri WP, que no usa la etiqueta
+ * {@code <header>} nativa: los iconos sociales viven dentro de un contenedor
+ * {@code .h-social-icons} que puede aparecer tanto en la cabecera como en el
+ * pie. Además, el canal de Telegram aparece en el footer como un enlace de
+ * botón con texto "Canal Telegram" (no como icono social).</p>
+ *
+ * <p>Por eso se escanea el documento entero en dos pasadas:
+ * <ol>
+ *   <li>Primera pasada: todos los anchors dentro de {@code .h-social-icons}
+ *       (garantiza cubrir los iconos del Colibri).</li>
+ *   <li>Segunda pasada: cualquier anchor del documento cuya URL coincida con
+ *       un dominio de red social conocido (Facebook, Instagram, YouTube,
+ *       WhatsApp, Telegram, X/Twitter, TikTok, LinkedIn…).</li>
+ * </ol>
+ * Deduplicamos por URL exacta: {@code whatsapp.com/channel/...} y
+ * {@code wa.me/...} son entradas distintas aunque ambas pertenezcan a
+ * WhatsApp.</p>
  */
 @Component // Bean Spring registrado por la factory de estrategias.
 public class SocialsScrapingStrategy implements ScrapingStrategy<List<SocialLinkDTO>> {
@@ -37,7 +49,7 @@ public class SocialsScrapingStrategy implements ScrapingStrategy<List<SocialLink
     // Logger operativo.
     private static final Logger log = LoggerFactory.getLogger(SocialsScrapingStrategy.class);
 
-    // Mapa dominio → nombre canónico de red. El orden de inserción define la prioridad de detección.
+    // Mapa dominio → nombre canónico de red. Orden de inserción = prioridad de detección.
     private static final Map<String, String> DOMAIN_TO_NETWORK = buildDomainMap();
 
     @Override
@@ -47,83 +59,54 @@ public class SocialsScrapingStrategy implements ScrapingStrategy<List<SocialLink
 
     @Override
     public List<SocialLinkDTO> extract(Document document) {
-        // LinkedHashMap preserva orden de inserción y permite deduplicar por red.
-        Map<String, SocialLinkDTO> byNetwork = new LinkedHashMap<>();
+        // LinkedHashMap preserva orden de inserción y deduplica por URL.
+        Map<String, SocialLinkDTO> byUrl = new LinkedHashMap<>();
 
-        // 1. Header: redes sociales generales del sitio.
-        Element header = document.selectFirst("header");
-        if (header != null) {
-            collectFromScope(header, byNetwork);                                // Recolecta enlaces visibles en la cabecera.
-        } else {
-            log.debug("No <header> encontrado; saltamos extracción de cabecera.");
-        }
+        // 1. Colibri social icons (contenedor específico del tema).
+        Elements colibriIcons = document.select(".h-social-icons a[href]");
+        collectAnchors(colibriIcons, byUrl);
+        log.debug("Iconos Colibri encontrados: {}", colibriIcons.size());
 
-        // 2. Footer: búsqueda dirigida de Telegram (único caso exclusivo del pie en este sitio).
-        Element footer = document.selectFirst("footer");
-        if (footer != null) {
-            collectTelegramFromFooter(footer, byNetwork);                       // Inyecta telegram si no apareció antes.
-            // Recolectamos también el resto por si el tema mueve iconos al footer.
-            collectFromScope(footer, byNetwork);
-        } else {
-            log.debug("No <footer> encontrado; saltamos extracción del pie.");
-        }
+        // 2. Cualquier otro anchor del documento que apunte a un dominio conocido.
+        Elements allAnchors = document.select("a[href]");
+        collectAnchors(allAnchors, byUrl);
 
-        List<SocialLinkDTO> result = new ArrayList<>(byNetwork.values());       // Conversión a lista ordenada.
+        List<SocialLinkDTO> result = new ArrayList<>(byUrl.values()); // Lista ordenada por primer hallazgo.
         log.info("Redes sociales detectadas: {}", result.size());
         return result;
     }
 
     /**
-     * Escanea todos los {@code <a href>} dentro de un ámbito (header/footer)
-     * y registra el primero que matche cada red social conocida.
+     * Itera una lista de anchors y registra cada uno cuyo href coincida con
+     * un dominio de red social conocido. Deduplica por URL absoluta.
      */
-    private void collectFromScope(Element scope, Map<String, SocialLinkDTO> byNetwork) {
-        Elements anchors = scope.select("a[href]");                             // Todos los enlaces del ámbito.
+    private void collectAnchors(Elements anchors, Map<String, SocialLinkDTO> byUrl) {
         for (Element a : anchors) {
-            String href = a.attr("abs:href");                                   // URL absoluta.
-            if (href == null || href.isBlank()) continue;
-            String network = classifyNetwork(href);                             // Nombre canónico o null.
-            if (network == null) continue;
-            byNetwork.putIfAbsent(network, new SocialLinkDTO(network, href));   // Primer hit gana.
+            String href = a.attr("abs:href");                                   // URL absoluta resuelta por Jsoup.
+            if (href == null || href.isBlank()) continue;                       // Ignoramos anchors sin destino útil.
+
+            String network = classifyNetwork(href);                             // Clasificación por dominio.
+            if (network == null) continue;                                      // Dominio no reconocido → saltamos.
+
+            byUrl.putIfAbsent(href, new SocialLinkDTO(network, href));          // Primer hallazgo para esa URL gana.
         }
     }
 
     /**
-     * Busca específicamente el enlace de Telegram en el footer. Además del
-     * dominio {@code t.me}, también se aceptan {@code telegram.me} y el
-     * fragmento "telegram" presente en atributos {@code aria-label}/texto.
-     */
-    private void collectTelegramFromFooter(Element footer, Map<String, SocialLinkDTO> byNetwork) {
-        if (byNetwork.containsKey("telegram")) return;                          // Ya localizado antes; no duplicamos.
-        Elements anchors = footer.select("a[href]");
-        for (Element a : anchors) {
-            String href = a.attr("abs:href");
-            if (href == null || href.isBlank()) continue;
-            String lower = href.toLowerCase(Locale.ROOT);
-            String label = (a.attr("aria-label") + " " + a.text()).toLowerCase(Locale.ROOT);
-            boolean hrefMatch = lower.contains("t.me/") || lower.contains("telegram.me/") || lower.contains("telegram.org/");
-            boolean textMatch = label.contains("telegram");
-            if (hrefMatch || textMatch) {
-                byNetwork.putIfAbsent("telegram", new SocialLinkDTO("telegram", href));
-                return;                                                          // Solo necesitamos el primer match.
-            }
-        }
-    }
-
-    /**
-     * Clasifica la URL en una red social conocida. Devuelve null si no hay match.
+     * Clasifica la URL en una red social conocida.
+     * @return nombre canónico de la red o {@code null} si no hay match.
      */
     private String classifyNetwork(String href) {
-        String lower = href.toLowerCase(Locale.ROOT);
+        String lower = href.toLowerCase(Locale.ROOT);                           // Comparación case-insensitive.
         for (Map.Entry<String, String> entry : DOMAIN_TO_NETWORK.entrySet()) {
-            if (lower.contains(entry.getKey())) return entry.getValue();
+            if (lower.contains(entry.getKey())) return entry.getValue();        // Primer dominio match determina la red.
         }
-        return null;
+        return null;                                                            // Sin coincidencia = no es red social.
     }
 
     /**
      * Construye la tabla de dominios reconocidos. Mantener orden para priorizar
-     * dominios más específicos (p. ej. youtu.be antes que youtube.com).
+     * dominios más específicos (p. ej. {@code youtu.be} antes que {@code youtube.com}).
      */
     private static Map<String, String> buildDomainMap() {
         Map<String, String> m = new LinkedHashMap<>();

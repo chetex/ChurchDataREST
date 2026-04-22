@@ -9,7 +9,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Component
 public class NavigationScrapingStrategy implements ScrapingStrategy<List<NavigationItemDTO>> {
@@ -70,7 +72,29 @@ public class NavigationScrapingStrategy implements ScrapingStrategy<List<Navigat
             navigationItems.add(mainItem);
         }
 
-        log.info("Extracted {} navigation items using universal selectors.", navigationItems.size());
-        return navigationItems;
+        // Dedupe pass: items that appear as subItems of another top-level entry must not be
+        // duplicated at the top level (e.g. "Contactar", "Horarios" appear both under "Contacto"
+        // and as flat items when the site renders the mobile drawer alongside the desktop menu).
+        Set<String> subItemUrls = new HashSet<>();
+        for (NavigationItemDTO item : navigationItems) {
+            if (item.getSubItems() == null) continue;
+            for (NavigationItemDTO sub : item.getSubItems()) {
+                if (sub.getUrl() != null && !sub.getUrl().isBlank()) {
+                    subItemUrls.add(sub.getUrl());
+                }
+            }
+        }
+        List<NavigationItemDTO> deduped = new ArrayList<>(navigationItems.size());
+        for (NavigationItemDTO item : navigationItems) {
+            // Keep top-level items that have children OR whose URL does not appear in any sibling's subItems.
+            boolean hasChildren = item.getSubItems() != null && !item.getSubItems().isEmpty();
+            if (hasChildren || !subItemUrls.contains(item.getUrl())) {
+                deduped.add(item);
+            }
+        }
+
+        log.info("Extracted {} navigation items ({} dropped as duplicates of subItems).",
+                deduped.size(), navigationItems.size() - deduped.size());
+        return deduped;
     }
 }

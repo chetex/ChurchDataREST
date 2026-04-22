@@ -64,14 +64,19 @@ public class StatusService {
     // Spring Data repository that persists the latest observed fingerprint.
     private final ContentFingerprintRepository fingerprintRepository;
 
+    // Generic JSON cache facade; wiped whenever a new fingerprint is detected.
+    private final CacheService cacheService;
+
     /**
-     * Constructor injection: Spring wires the repository bean and the
-     * configured URL, keeping the class easy to unit-test.
+     * Constructor injection: Spring wires the repositories, the cache facade
+     * and the configured URL, keeping the class easy to unit-test.
      */
     public StatusService(@Value("${church.url}") String churchUrl,
-                         ContentFingerprintRepository fingerprintRepository) {
+                         ContentFingerprintRepository fingerprintRepository,
+                         CacheService cacheService) {
         this.churchUrl = churchUrl; // Store the source URL for later scraping.
         this.fingerprintRepository = fingerprintRepository; // Store the repository used for persistence.
+        this.cacheService = cacheService; // Store the cache facade so we can invalidate it on change.
     }
 
     /**
@@ -88,9 +93,10 @@ public class StatusService {
         String freshHash = computeHomeFingerprint(); // Fetch + hash the current home page state.
         Optional<ContentFingerprint> stored = fingerprintRepository.findById(HOME_SCOPE); // Look up last known hash.
 
-        // First run ever: persist the fingerprint and answer "true" so clients force an initial scrape.
+        // First run ever: persist the fingerprint, wipe any stale cache and answer "true" so clients force an initial scrape.
         if (stored.isEmpty()) {
             fingerprintRepository.save(new ContentFingerprint(HOME_SCOPE, freshHash, Instant.now()));
+            cacheService.invalidateAll(); // Fresh boot: discard any leftover rows from a previous schema.
             log.info("No previous fingerprint stored; treating site as containing new elements.");
             return true;
         }
@@ -103,9 +109,10 @@ public class StatusService {
             return false;
         }
 
-        // Hash differs: record the new one and return true so consumers refresh their caches.
+        // Hash differs: record the new one, invalidate the cache and return true so endpoints re-scrape on next call.
         existing.update(freshHash, Instant.now()); // Mutate the managed entity; Hibernate will flush it.
-        log.info("Fingerprint changed for scope '{}': new elements detected.", HOME_SCOPE);
+        cacheService.invalidateAll(); // Drop every cached JSON row so follow-up endpoints rebuild them from scratch.
+        log.info("Fingerprint changed for scope '{}': new elements detected and cache invalidated.", HOME_SCOPE);
         return true;
     }
 

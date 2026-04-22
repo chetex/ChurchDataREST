@@ -80,8 +80,12 @@ public class HomeContentScrapingStrategy implements ScrapingStrategy<List<HomeCo
 
         if (isBlank(title) && isBlank(text)) return null;
 
+        // Dividimos el título en (title, subtitle) para que la app pueda renderizarlos separados.
+        String[] split = splitTitleAndSubtitle(title);
+
         return new HomeContentItemDTO(
-                safeTrim(title),
+                nullIfBlank(split[0]),
+                nullIfBlank(split[1]),
                 safeTrim(text),
                 nullIfBlank(image),
                 nullIfBlank(linkUrl),
@@ -136,8 +140,11 @@ public class HomeContentScrapingStrategy implements ScrapingStrategy<List<HomeCo
             String fingerprint = (title + "|" + (text == null ? "" : text)).toLowerCase();
             if (!seen.add(fingerprint)) continue;
 
+            // Aplicamos la misma partición title/subtitle que en los posts Colibri.
+            String[] split = splitTitleAndSubtitle(title);
             items.add(new HomeContentItemDTO(
-                    safeTrim(title),
+                    nullIfBlank(split[0]),
+                    nullIfBlank(split[1]),
                     safeTrim(text),
                     nullIfBlank(image),
                     nullIfBlank(linkUrl),
@@ -170,6 +177,39 @@ public class HomeContentScrapingStrategy implements ScrapingStrategy<List<HomeCo
     // ---------------------------------------------------------------------
     // Helpers
     // ---------------------------------------------------------------------
+
+    /**
+     * Divide el título bruto extraído de la web en dos campos {@code (title, subtitle)}.
+     *
+     * <p>El sitio entrega frecuentemente el título como un único bloque que
+     * mezcla cabecera y subtítulo. Intentamos separarlos por los delimitadores
+     * más comunes (en este orden: em-dash, en-dash, guion rodeado de
+     * espacios, dos puntos, pipe, salto de línea). Si no encontramos ninguno,
+     * devolvemos el título completo en {@code [0]} y {@code null} en {@code [1]}.</p>
+     *
+     * @param rawTitle texto bruto del título (puede ser null o vacío).
+     * @return array de dos posiciones: {@code [0]} título principal y {@code [1]} subtítulo.
+     */
+    private String[] splitTitleAndSubtitle(String rawTitle) {
+        if (isBlank(rawTitle)) return new String[] { null, null }; // Defensivo: nada que dividir.
+        String normalized = rawTitle.replace('\u00A0', ' ').trim(); // Sustituye NBSP por espacio normal.
+
+        // Orden deliberado: primero separadores inequívocos (em/en dash), después variantes más ambiguas.
+        String[] separators = { " — ", " – ", " - ", " \u2014 ", " \u2013 ", ": ", " | ", "\n" };
+        for (String sep : separators) {
+            int idx = normalized.indexOf(sep);
+            if (idx > 0 && idx < normalized.length() - sep.length()) {           // Separador en medio (no al inicio/final).
+                String head = normalized.substring(0, idx).trim();               // Parte previa = título principal.
+                String tail = normalized.substring(idx + sep.length()).trim();   // Parte posterior = subtítulo.
+                if (!head.isEmpty() && !tail.isEmpty()) {
+                    return new String[] { head, tail };                          // Partición válida encontrada.
+                }
+            }
+        }
+
+        // Fallback: no detectado separador; devolvemos el título completo y subtítulo nulo.
+        return new String[] { normalized, null };
+    }
 
     private String textOrNull(Element el) {
         if (el == null) return null;

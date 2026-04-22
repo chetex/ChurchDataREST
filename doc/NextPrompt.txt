@@ -1,0 +1,249 @@
+(1)
+
+http://localhost:8080/api/home/menu
+
+La llamada esta..
+
+[
+    {
+        "name": "Ayúdanos a Construir",
+        "url": "https://www.parroquiasanpablovi.es/index.php/juntos-crecemos-mejor/",
+        "subItems": []
+    },
+    {
+        "name": "Ntra Madre del Nuevo Tres Cantos",
+        "url": "https://www.parroquiasanpablovi.es/index.php/ntra-madre-del-nuevo-tres-cantos/",
+        "subItems": []
+    },
+    {
+        "name": "Grupos Parroquiales",
+        "url": "https://www.parroquiasanpablovi.es/index.php/grupos-parroquiales/",
+        "subItems": []
+    },
+    {
+        "name": "Otros Servicios",
+        "url": "https://www.parroquiasanpablovi.es/index.php/otros-servicios/",
+        "subItems": []
+    },
+    {
+        "name": "Contacto",
+        "url": "https://www.parroquiasanpablovi.es/#",
+        "subItems": [
+            {
+                "name": "Contactar",
+                "url": "https://www.parroquiasanpablovi.es/index.php/contact/",
+                "subItems": []
+            },
+            {
+                "name": "Horarios",
+                "url": "https://www.parroquiasanpablovi.es/index.php/horario/",
+                "subItems": []
+            },
+            {
+                "name": "Enlaces",
+                "url": "https://www.parroquiasanpablovi.es/index.php/enlaces/",
+                "subItems": []
+            }
+        ]
+    },
+    {
+        "name": "Contactar",
+        "url": "https://www.parroquiasanpablovi.es/index.php/contact/",
+        "subItems": []
+    },
+    {
+        "name": "Horarios",
+        "url": "https://www.parroquiasanpablovi.es/index.php/horario/",
+        "subItems": []
+    },
+    {
+        "name": "Enlaces",
+        "url": "https://www.parroquiasanpablovi.es/index.php/enlaces/",
+        "subItems": []
+    }
+]
+
+Contactar, Enlaces, y horarios sale dos veces, como subItems, y como items. Dejalo solo como subitems.
+
+(2)
+
+2026-04-20T20:19:39.351+02:00  INFO 8225 --- [rest] [nio-8080-exec-8] c.c.c.r.s.SocialsScrapingStrategy        : Redes sociales detectadas: 0
+
+/**
+     * Devuelve un array consolidado de redes sociales (header + Telegram
+     * localizado en el footer).
+     *
+     * @return Lista de {@link SocialLinkDTO} con nombre canónico y URL.
+     * @throws IOException si falla el scraping.
+     */
+    @GetMapping("/socials")
+    public List<SocialLinkDTO> getSocials() throws IOException {
+        return webScrapingService.getSocials();
+    }
+
+
+No encuentra redes, ni en el header, ni en el footer.... el html de la web es...
+
+<div class="d-flex flex-wrap h-social-icons justify-content-lg-center justify-content-md-center justify-content-center">
+                        <div class="social-icon-container d-inline-flex">
+                          <a href="https://whatsapp.com/channel/0029Va7uRtxLI8YgadPqH12l" h-use-smooth-scroll="true">
+                            <div class="icon-container h-social-icon h-global-transition" style="fill: rgb(37, 211, 102);">
+                              <div class="h-icon-svg" style="width: 100%; height: 100%;">
+                                <!--Icon by Socicon (http://www.socicon.com)-->
+                                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1500">
+
+                                  <path d="M1280.273 216.797c-140.625-140.625-328.125-216.797-527.344-216.797-410.156 0-744.141 333.984-744.141 744.141 0 128.906 35.156 257.813 99.609 372.070l-105.469 383.789 395.508-102.539c108.398 58.594 228.516 90.82 354.492 90.82v0c0 0 0 0 0 0 410.156 0 744.141-333.984 744.141-744.141 0-199.219-76.172-386.719-216.797-527.344zM752.93 1362.305v0c-111.328 0-219.727-29.297-313.477-87.891l-23.438-11.719-234.375 61.523 61.523-228.516-14.648-23.438c-61.523-99.609-93.75-210.938-93.75-328.125 0-342.773 278.32-618.164 618.164-618.164 164.063 0 319.336 64.453 436.523 181.641s181.641 272.461 181.641 436.523c0 339.844-278.32 618.164-618.164 618.164zM1092.773 899.414c-20.508-8.789-111.328-55.664-128.906-61.523-14.648-5.859-29.297-8.789-41.016 8.789-11.719 20.508-46.875 61.523-58.594 73.242s-20.508 14.648-41.016 5.859c-17.578-8.789-76.172-29.297-149.414-93.75-52.734-46.875-90.82-108.398-102.539-128.906-11.719-17.578 0-26.367 8.789-38.086 8.789-5.859 17.578-20.508 26.367-32.227 11.719-8.789 14.648-17.578 20.508-29.297s2.93-23.438-2.93-32.227c-2.93-8.789-41.016-102.539-55.664-137.695-17.578-38.086-32.227-32.227-43.945-32.227-8.789 0-23.438 0-35.156 0s-32.227 2.93-49.805 20.508c-17.578 20.508-64.453 64.453-64.453 155.273 0 93.75 67.383 181.641 76.172 193.359s131.836 199.219 316.406 281.25c43.945 17.578 79.102 29.297 105.469 38.086 46.875 14.648 84.961 11.719 117.188 8.789 38.086-5.859 111.328-46.875 125.977-90.82 17.578-41.016 17.578-79.102 11.719-87.891-5.859-5.859-17.578-11.719-35.156-20.508z"></path>
+                                </svg>
+                              </div>
+                            </div>
+                          </a>
+                        </div>
+                        <div class="social-icon-container d-inline-flex">
+                          <a href="https://instagram.com/sanpablovi_trescantos?igshid=MTMzZm5reng5em1leQ==" h-use-smooth-scroll="true">
+                            <div class="icon-container h-social-icon h-global-transition" style="fill: rgb(195, 42, 163);">
+                              <div class="h-icon-svg" style="width: 100%; height: 100%;">
+                                <!--Icon by Socicon (http://www.socicon.com)-->
+                                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1500">
+
+                                  <path d="M750 134.766c202.148 0 222.656 2.93 301.758 5.859 76.172 2.93 114.258 14.648 140.625 23.438 35.156 14.648 61.523 32.227 84.961 55.664 26.367 26.367 43.945 52.734 55.664 84.961 11.719 29.297 23.438 67.383 26.367 140.625 2.93 82.031 5.859 102.539 5.859 304.688s-2.93 222.656-5.859 301.758c-2.93 76.172-14.648 114.258-23.438 140.625-14.648 35.156-32.227 61.523-55.664 84.961-26.367 26.367-52.734 43.945-84.961 55.664-29.297 11.719-67.383 23.438-140.625 26.367-82.031 2.93-102.539 5.859-304.688 5.859s-222.656-2.93-301.758-5.859c-76.172-2.93-114.258-14.648-140.625-23.438-35.156-14.648-61.523-32.227-84.961-55.664-26.367-26.367-43.945-52.734-55.664-84.961-11.719-29.297-23.438-67.383-26.367-140.625-2.93-82.031-5.859-102.539-5.859-304.688s2.93-222.656 5.859-301.758c2.93-76.172 14.648-114.258 23.438-140.625 14.648-35.156 32.227-61.523 55.664-84.961 26.367-26.367 52.734-43.945 84.961-55.664 29.297-11.719 67.383-23.438 140.625-26.367 82.031-2.93 102.539-5.859 304.688-5.859M750 0c-205.078 0-228.516 2.93-307.617 5.859-82.031 2.93-137.695 14.648-181.641 32.227-49.805 20.508-93.75 46.875-134.766 87.891s-67.383 84.961-87.891 134.766c-17.578 46.875-29.297 99.609-32.227 181.641-2.93 79.102-5.859 102.539-5.859 307.617s2.93 228.516 5.859 307.617c2.93 82.031 14.648 137.695 32.227 181.641 20.508 49.805 46.875 93.75 87.891 134.766s84.961 67.383 134.766 87.891c46.875 17.578 99.609 29.297 181.641 32.227 79.102 2.93 102.539 5.859 307.617 5.859s228.516-2.93 307.617-5.859c82.031-2.93 137.695-14.648 181.641-32.227 49.805-20.508 93.75-46.875 134.766-87.891s67.383-84.961 87.891-134.766c17.578-46.875 29.297-99.609 32.227-181.641 2.93-79.102 5.859-102.539 5.859-307.617s-2.93-228.516-5.859-307.617c-2.93-82.031-14.648-137.695-32.227-181.641-20.508-49.805-46.875-93.75-87.891-134.766s-84.961-67.383-134.766-87.891c-46.875-17.578-99.609-29.297-181.641-32.227-79.102-2.93-102.539-5.859-307.617-5.859zM750 363.281c-213.867 0-386.719 172.852-386.719 386.719s172.852 386.719 386.719 386.719c213.867 0 386.719-172.852 386.719-386.719s-172.852-386.719-386.719-386.719zM750 1001.953c-137.695 0-251.953-114.258-251.953-251.953s114.258-251.953 251.953-251.953c137.695 0 251.953 114.258 251.953 251.953s-114.258 251.953-251.953 251.953zM1239.258 348.633c0 49.805-38.086 90.82-87.891 90.82s-90.82-41.016-90.82-90.82c0-49.805 41.016-87.891 90.82-87.891s87.891 38.086 87.891 87.891z"></path>
+                                </svg>
+                              </div>
+                            </div>
+                          </a>
+                        </div>
+                        <div class="social-icon-container d-inline-flex">
+                          <a href="https://wa.me/+34911040377" h-use-smooth-scroll="true">
+                            <div class="icon-container h-social-icon h-global-transition" style="fill: rgb(0, 0, 0);">
+                              <div class="h-icon-svg" style="width: 100%; height: 100%;">
+                                <!--Icon by Font Awesome (https://fontawesome.com)-->
+                                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="comments-o" viewBox="0 0 1792 1896.0833">
+                                  <path d="M704 384q-153 0-286 52T206.5 577 128 768q0 82 53 158t149 132l97 56-35 84q34-20 62-39l44-31 53 10q78 14 153 14 153 0 286-52t211.5-141 78.5-191-78.5-191T990 436t-286-52zm0-128q191 0 353.5 68.5T1314 511t94 257-94 257-256.5 186.5T704 1280q-86 0-176-16-124 88-278 128-36 9-86 16h-3q-11 0-20.5-8t-11.5-21q-1-3-1-6.5t.5-6.5 2-6l2.5-5 3.5-5.5 4-5 4.5-5 4-4.5q5-6 23-25t26-29.5 22.5-29 25-38.5 20.5-44q-124-72-195-177T0 768q0-139 94-257t256.5-186.5T704 256zm822 1169q10 24 20.5 44t25 38.5 22.5 29 26 29.5 23 25q1 1 4 4.5t4.5 5 4 5 3.5 5.5l2.5 5 2 6 .5 6.5-1 6.5q-3 14-13 22t-22 7q-50-7-86-16-154-40-278-128-90 16-176 16-271 0-472-132 58 4 88 4 161 0 309-45t264-129q125-92 192-212t67-254q0-77-23-152 129 71 204 178t75 230q0 120-71 224.5T1526 1425z"></path>
+                                </svg>
+                              </div>
+                            </div>
+                          </a>
+                        </div>
+                        <div class="social-icon-container d-inline-flex">
+                          <a href="https://www.youtube.com/@ParroquiaSanPabloVI" h-use-smooth-scroll="true">
+                            <div class="icon-container h-social-icon h-global-transition" style="fill: rgb(255, 0, 0);">
+                              <div class="h-icon-svg" style="width: 100%; height: 100%;">
+                                <!--Icon by Socicon (http://www.socicon.com)-->
+                                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1500">
+
+                                  <path d="M1485.352 451.172c0 0-14.648-105.469-58.594-149.414-58.594-61.523-123.047-61.523-152.344-64.453-208.008-14.648-524.414-14.648-524.414-14.648v0c0 0-316.406 0-524.414 14.648-29.297 2.93-93.75 2.93-152.344 64.453-43.945 43.945-58.594 149.414-58.594 149.414s-14.648 120.117-14.648 240.234v114.258c0 123.047 14.648 243.164 14.648 243.164s14.648 102.539 58.594 149.414c58.594 58.594 134.766 58.594 166.992 64.453 120.117 11.719 509.766 14.648 509.766 14.648s316.406 0 524.414-14.648c29.297-2.93 93.75-5.859 152.344-64.453 43.945-46.875 58.594-149.414 58.594-149.414s14.648-120.117 14.648-243.164v-114.258c0-120.117-14.648-240.234-14.648-240.234zM952.148 761.719v0l-354.492 184.57v-421.875l404.297 210.938z"></path>
+                                </svg>
+                              </div>
+                            </div>
+                          </a>
+                        </div>
+                      </div>
+
+y del footer para el telegram es...
+
+<a h-use-smooth-scroll="true" href="https://t.me/parroquiasanpablovi3c" data-colibri-id="382-m29" class="d-flex w-100 align-items-center h-button justify-content-lg-center justify-content-md-center justify-content-center style-381 style-local-382-m29 position-relative"><!----><!----> <span>Canal Telegram</span></a>
+
+Recoge las redes sociales, el canal del telegram, nombre y enlaces, y devuelvelos en el JSON de llamada
+
+(3)
+
+En la pagina de "detail", me muestras el "fullContentHtml" de la url, pero solo quiero el contenido del texto.... 
+
+En esta web de destalle... https://www.parroquiasanpablovi.es/index.php/2025/06/21/corpus-christi-2025-este-domingo-salimos-con-jesus-a-las-calles/
+
+quiero coger la fecha junio 21, 2025
+
+y quiero el texto solo...
+
+<div data-colibri-id="379-m7" class="d-flex h-flex-basis h-column__inner h-px-lg-3 h-px-md-3 h-px-3 v-inner-lg-3 v-inner-md-3 v-inner-3 style-76 style-local-379-m7 position-relative"> <div class="w-100 h-y-container h-column__content h-column__v-align flex-basis-100 align-self-lg-start align-self-md-start align-self-start"> <div data-colibri-id="379-m8" class="h-blog-meta style-77 style-local-379-m8 position-relative h-element"><div class="metadata-item"> <a href="https://www.parroquiasanpablovi.es/index.php/2025/06/21/">junio 21, 2025</a></div></div><div data-colibri-id="379-m9" class="style-78 style-local-379-m9 position-relative h-element"><div class="colibri-post-content h-global-transition-all">
+<p>Este <strong>domingo 22 de junio</strong>, las tres parroquias de Tres Cantos —<strong>San Pablo VI, Santa Teresa de Jesús y Santa María Madre de Dios</strong>— celebraremos juntas la <strong>Solemnidad del Corpus Christi</strong>, el día en que la Iglesia proclama con fuerza y alegría que <strong>Jesús está vivo y presente en la Eucaristía</strong>.</p>
+
+
+
+<p>No es solo una fiesta litúrgica: es una <strong>profesión pública de fe</strong>. En un tiempo que necesita signos visibles de esperanza, salimos a las calles para decir con nuestra presencia que <strong>Cristo camina con nosotros</strong>.</p>
+
+
+
+<hr class="wp-block-separator has-alpha-channel-opacity">
+
+
+
+<h3 class="wp-block-heading"><strong>¿Qué viviremos juntos este domingo?</strong></h3>
+
+
+
+<p><img draggable="false" role="img" class="emoji" alt="🕢" src="https://s.w.org/images/core/emoji/17.0.2/svg/1f562.svg"> <strong>19:00 h</strong> · <em>Eucaristía en el colegio de las Mercedarias</em><br><img draggable="false" role="img" class="emoji" alt="🚶" src="https://s.w.org/images/core/emoji/17.0.2/svg/1f6b6.svg"> <strong>20:00 h</strong> · <em>Procesión hasta la Parroquia Santa Teresa de Jesús</em></p>
+
+
+
+<p>Recorreremos las calles del centro como una <strong>Iglesia en camino</strong>, acompañando al Santísimo Sacramento. Caminaremos tras Él porque creemos en su presencia real. Porque su amor transforma, y queremos que llegue a todos.</p>
+
+
+
+<hr class="wp-block-separator has-alpha-channel-opacity">
+
+
+
+<h3 class="wp-block-heading"><strong>Una comunidad unida en torno a Cristo</strong></h3>
+
+
+
+<p>La procesión del Corpus es un gesto que une generaciones, parroquias y sensibilidades. Es <strong>adorar con los pies, orar con el cuerpo, y anunciar con la vida</strong>.</p>
+
+
+
+<p>Este domingo, no lo mires desde fuera. <strong>Vívelo desde dentro.</strong></p>
+
+
+
+<hr class="wp-block-separator has-alpha-channel-opacity">
+
+
+
+<h3 class="wp-block-heading"><strong>¿Quieres ayudar como costalero?</strong></h3>
+
+
+
+<p>Todavía estás a tiempo. Si deseas colaborar portando el paso del Santísimo en algún tramo, entra n este link y apúntate! </p>
+
+
+
+<p><a href="https://docs.google.com/forms/d/1g-3gTlQviCRUuOl_wPcFMkfXpp7_RpFblfZDFaoWXoQ/edit">Inscripción</a></p>
+
+
+
+<p>Gracias por tu compromiso. Hacer posible esta celebración también es una forma de evangelizar.</p>
+
+
+
+<hr class="wp-block-separator has-alpha-channel-opacity">
+
+
+
+<p>Nos vemos el domingo.<br><strong>Jesús sale a tu encuentro. Y te invita a caminar con Él.</strong></p>
+
+
+
+<p>#CorpusChristiTresCantos #SanPabloVI #ParroquiaUnida #IglesiaEnCamino #PalabraViva #ComunidadEnCamino</p>
+</div></div></div></div>
+
+Arreglalo.
+
+(4)
+
+Quita el endpoint de 
+
+/**
+     * Extrae el contenido estructurado (bloques HTML preservados) de la
+     * URL indicada. La app móvil renderiza el HTML de cada bloque nativamente.
+     *
+     * @param url URL absoluta a scrapear (normalmente procede de
+     *            {@link HomeContentItemDTO#linkUrl()}).
+     * @return DTO con el título de la página y los bloques de contenido.
+     * @throws IOException si falla la descarga o parseo.
+     */
+    @GetMapping("/page/content")
+    public PageContentDTO getPageContent(@RequestParam String url) throws IOException {
+        return webScrapingService.getPageContent(url);
+    }
+
+que no se usa.

@@ -1,9 +1,18 @@
 /Users/ignaciogarciagomez/Desarrollo/Java/ChurchDataREST/src/main/java/com/chetex/church/rest/RestApplication.java
+/Users/ignaciogarciagomez/Desarrollo/Java/ChurchDataREST/src/main/java/com/chetex/church/rest/controller/StatusController.java
 /Users/ignaciogarciagomez/Desarrollo/Java/ChurchDataREST/src/main/java/com/chetex/church/rest/controller/WebScrapingController.java
 /Users/ignaciogarciagomez/Desarrollo/Java/ChurchDataREST/src/main/java/com/chetex/church/rest/dto/DetailPageDTO.java
 /Users/ignaciogarciagomez/Desarrollo/Java/ChurchDataREST/src/main/java/com/chetex/church/rest/dto/HomeContentItemDTO.java
 /Users/ignaciogarciagomez/Desarrollo/Java/ChurchDataREST/src/main/java/com/chetex/church/rest/dto/NavigationItemDTO.java
+/Users/ignaciogarciagomez/Desarrollo/Java/ChurchDataREST/src/main/java/com/chetex/church/rest/dto/NewElementsStatusDTO.java
 /Users/ignaciogarciagomez/Desarrollo/Java/ChurchDataREST/src/main/java/com/chetex/church/rest/dto/NewsItemDTO.java
+/Users/ignaciogarciagomez/Desarrollo/Java/ChurchDataREST/src/main/java/com/chetex/church/rest/dto/SocialLinkDTO.java
+/Users/ignaciogarciagomez/Desarrollo/Java/ChurchDataREST/src/main/java/com/chetex/church/rest/entity/CachedResponse.java
+/Users/ignaciogarciagomez/Desarrollo/Java/ChurchDataREST/src/main/java/com/chetex/church/rest/entity/ContentFingerprint.java
+/Users/ignaciogarciagomez/Desarrollo/Java/ChurchDataREST/src/main/java/com/chetex/church/rest/repository/CachedResponseRepository.java
+/Users/ignaciogarciagomez/Desarrollo/Java/ChurchDataREST/src/main/java/com/chetex/church/rest/repository/ContentFingerprintRepository.java
+/Users/ignaciogarciagomez/Desarrollo/Java/ChurchDataREST/src/main/java/com/chetex/church/rest/service/CacheService.java
+/Users/ignaciogarciagomez/Desarrollo/Java/ChurchDataREST/src/main/java/com/chetex/church/rest/service/StatusService.java
 /Users/ignaciogarciagomez/Desarrollo/Java/ChurchDataREST/src/main/java/com/chetex/church/rest/service/WebScrapingService.java
 /Users/ignaciogarciagomez/Desarrollo/Java/ChurchDataREST/src/main/java/com/chetex/church/rest/strategy/DetailPageScrapingStrategy.java
 /Users/ignaciogarciagomez/Desarrollo/Java/ChurchDataREST/src/main/java/com/chetex/church/rest/strategy/HomeContentScrapingStrategy.java
@@ -12,3 +21,4 @@
 /Users/ignaciogarciagomez/Desarrollo/Java/ChurchDataREST/src/main/java/com/chetex/church/rest/strategy/ScrapingStrategy.java
 /Users/ignaciogarciagomez/Desarrollo/Java/ChurchDataREST/src/main/java/com/chetex/church/rest/strategy/ScrapingStrategyFactory.java
 /Users/ignaciogarciagomez/Desarrollo/Java/ChurchDataREST/src/main/java/com/chetex/church/rest/strategy/ScrapingType.java
+/Users/ignaciogarciagomez/Desarrollo/Java/ChurchDataREST/src/main/java/com/chetex/church/rest/strategy/SocialsScrapingStrategy.java

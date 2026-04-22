@@ -8,5 +8,6 @@ public enum ScrapingType {
     NAVIGATION,
     NEWS,
     DETAIL,
-    HOME
+    HOME,
+    SOCIALS // Enlaces a redes sociales recogidos del header + Telegram del footer.
 }

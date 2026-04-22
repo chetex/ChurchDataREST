@@ -4,6 +4,7 @@ import com.chetex.church.rest.dto.DetailPageDTO;
 import com.chetex.church.rest.dto.HomeContentItemDTO;
 import com.chetex.church.rest.dto.NavigationItemDTO;
 import com.chetex.church.rest.dto.NewsItemDTO;
+import com.chetex.church.rest.dto.SocialLinkDTO;
 import com.chetex.church.rest.service.WebScrapingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,19 +27,9 @@ public class WebScrapingController {
      * @return List of NavigationItemDTO objects representing the website's navigation.
      * @throws IOException Input output exception
      */
-    @GetMapping("/navigation")
+    @GetMapping("/home/menu")
     public List<NavigationItemDTO> getNavigation() throws IOException {
         return webScrapingService.getNavigation();
-    }
-
-    /**
-     * Scrape home news items and return them as a list of NewsItemDTO.
-     * @return List of NewsItemDTO objects representing the news from the home page.
-     * @throws IOException Input output exception
-     */
-    @GetMapping("/news")
-    public List<NewsItemDTO> getNews() throws IOException {
-        return webScrapingService.getHomeNews();
     }
 
     /**
@@ -49,7 +40,7 @@ public class WebScrapingController {
      * @return Lista agregada de elementos de contenido.
      * @throws IOException si falla el scraping de la home principal.
      */
-    @GetMapping("/home")
+    @GetMapping("/home/elements")
     public List<HomeContentItemDTO> getHome() throws IOException {
         return webScrapingService.getHomeAggregate();
     }
@@ -63,5 +54,17 @@ public class WebScrapingController {
     @GetMapping("/detail")
     public DetailPageDTO getDetailPage(@RequestParam String url) throws IOException {
         return webScrapingService.getDetailPage(url);
+    }
+
+    /**
+     * Devuelve un array consolidado de redes sociales (header + Telegram
+     * localizado en el footer).
+     *
+     * @return Lista de {@link SocialLinkDTO} con nombre canónico y URL.
+     * @throws IOException si falla el scraping.
+     */
+    @GetMapping("/socials")
+    public List<SocialLinkDTO> getSocials() throws IOException {
+        return webScrapingService.getSocials();
     }
 }
