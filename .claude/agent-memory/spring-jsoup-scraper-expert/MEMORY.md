@@ -1,0 +1,4 @@
+- [Project cache architecture direction](project_cache_architecture.md) — scrape+cache intermediary, `new-elements` gate, `CachedResponse` + `ContentFingerprint` entities.
+- [User wants line-by-line English comments](feedback_comment_every_line.md) — annotate every statement in new code for this project.
+- [Build tooling notes](reference_build_tooling.md) — mvnw wrapper is broken, use system `mvn` instead.
+- [Colibri WP selector crib sheet](reference_colibri_selectors.md) — stable Jsoup selectors (`.hentry`, `.h-blog-title`, `a.page-numbers`, …) for the parish site.
